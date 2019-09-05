@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+</head>
+<body onload="run()">
+<script>
+  
+  //todo
+  //check for solve
+  
+  // maintain game state here
+  var state = [
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0]
+  ];
+  
+  // game area details
+  var myGameArea = {
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = 480;
+        this.canvas.height = this.canvas.width;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.canvas.addEventListener('click', click, false);
+        },
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
+  
+  // user clicks game area
+  function click(event){
+    var size = myGameArea.canvas.width/4;
+    for (let i = state.length - 1; i >= 0; i--) {
+      for (let j = state[i].length - 1; j >= 0; j--) {
+        if ((event.pageX>=i*size)&&(event.pageY>=j*size)&&(event.pageX<=(i+1)*size)&&(event.pageY<=(j+1)*size)){
+          activate(j, i);
+          return;
+        }
+      }
+    }
+  }
+  
+  // user clicked block
+  function activate(x, y){
+    if(state[x][y]!=0){
+      if(x<3 && state[x+1][y]==0){
+        swap(x,y,x+1,y);
+      } else if (y<3 && state[x][y+1]==0){
+        swap(x,y,x,y+1);
+      } else if (x>0 && state[x-1][y]==0){
+        swap(x,y,x-1,y);
+      } else if (y>0 && state[x][y-1]==0){
+        swap(x,y,x,y-1);
+      }
+    }
+  }
+  
+  // swap two blocks
+  function swap(x, y, x2, y2){
+    [state[x][y], state[x2][y2]] = [state[x2][y2], state[x][y]];
+    render();
+  }
+  
+  // randomize game board
+  function randomize(){
+    var array = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    state[0]=array.slice(0,4);
+    state[1]=array.slice(4,8);
+    state[2]=array.slice(8,12);
+    state[3]=array.slice(12,16);
+  }
+  
+  // draw single block
+  function drawSquare(x, y, num){
+    var size = myGameArea.canvas.width/4;
+    myGameArea.context.fillStyle = "grey";
+    myGameArea.context.fillRect(x*size+5, y*size+5, size-10, size-10);
+    myGameArea.context.font = "50px Verdana";
+    myGameArea.context.fillStyle = "black";
+    myGameArea.context.fillText(num, x*size+size/4, (y+1)*size-size/3)
+  }
+  
+  // draw game board
+  function render(){
+    myGameArea.clear();
+    for (let i = state.length - 1; i >= 0; i--) {
+      for (let j = state[i].length - 1; j >= 0; j--) {
+        if (state[i][j]!=0){
+          drawSquare(j,i,state[i][j]);
+        }
+      }
+    }
+  }
+  
+  // called when site loads and every new game
+  function run(){
+    myGameArea.start();
+    randomize();
+    render();
+  }
+  
+  
+  
+</script>
+<br>
+<button onmouseup="run()">RUN</button>
+</body>
+</html>
